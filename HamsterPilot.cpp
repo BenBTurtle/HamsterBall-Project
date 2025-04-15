@@ -1,49 +1,93 @@
-﻿#include <avr/io.h>
+﻿/*
+ * Hammond.cpp
+ *
+ * Created: 4/15/2025 2:25:26 PM
+ * Author : Benjamin Betancourt
+ *
+ *
+ * Remember to merge with HamsterPilot.cpp for ease of transportation
+ */
+
+#include <avr/io.h>
 #include <avr/interrupt.h>
 
-class motorSystem{
-	private:
-	uint8_t status = 0;
-	public:
-	
-	motorSystem(uint8_t[3] positivePins, uint8_t[3] negativePins, char[3] oPorts){//initialise
-		uint8_t status = 0; //0 means that the function assigned pins correctly
-		for (int i = 0; i<3; i++){
-			switch (oPorts[i]){ //assign the two pins on the required port
-				case 'b': DDRB |= (1<<positivePins[i]) | (1<<negativePins[i]);
-				case 'B': DDRB |= (1<<positivePins[i]) | (1<<negativePins[i]);
-				case 'c': DDRC |= (1<<positivePins[i]) | (1<<negativePins[i]);
-				case 'C': DDRC |= (1<<positivePins[i]) | (1<<negativePins[i]);
-				case 'd': DDRD |= (1<<positivePins[i]) | (1<<negativePins[i]);
-				case 'D': DDRD |= (1<<positivePins[i]) | (1<<negativePins[i]);
-				default: status = i; //pin assignments failed!
+class motorSystem {
+	/*
+	* Motor 0 and 1 are the front and side motors, motor 2 is the back motor
+	*
+	* The positive pins enabled while negative pins disabled mean that the wheels move forward
+	* Negative enabled while positive pins disabled means that the wheels move backwards
+	* This intuition will be used for directional control
+	*
+	* Status codes:
+	* 0 = fine
+	* 1 = error with motor 0 initialization
+	* 2 = error with motor 1 initialization
+	* 3 = error with motor 2 initialization
+	* -1 = error with pin assignment (Using reserved pin such as PB5 (on board LED) or interrupt pins (PD2 and PD3) for motor control
+	*/
+
+private:
+
+	int status = 0; //See status codes for more information on functionality
+
+	//storage variables for usage in member functions
+	int Ppins[3], Npins[3];
+	char motorPorts[3];
+
+public:
+
+	motorSystem(int positivePins[3], int negativePins[3], char oPorts[3]) {//initialize
+		int status = 0; //0 means that the function assigned pins correctly
+		for (int i = 0; ((i < 3) && (status == 0)); i++) { //break loop if error
+			switch (oPorts[i]) { //assign the two pins on the required port, also assign port for later use
+			case 'b': DDRB |= (1 << positivePins[i]) | (1 << negativePins[i]); motorPorts[i] = 'B'; break;
+			case 'B': DDRB |= (1 << positivePins[i]) | (1 << negativePins[i]); motorPorts[i] = 'B'; break;
+			case 'c': DDRC |= (1 << positivePins[i]) | (1 << negativePins[i]); motorPorts[i] = 'C'; break;
+			case 'C': DDRC |= (1 << positivePins[i]) | (1 << negativePins[i]); motorPorts[i] = 'C'; break;
+			case 'd': DDRD |= (1 << positivePins[i]) | (1 << negativePins[i]); motorPorts[i] = 'D'; break;
+			case 'D': DDRD |= (1 << positivePins[i]) | (1 << negativePins[i]); motorPorts[i] = 'D'; break;
+			default: status = i + 1; break; //pin assignments failed!
 			}
+			Ppins[i] = positivePins[i]; Npins[i] = negativePins[i]; //assign class variables from input variables
 		}
-		
 	}
-	
-	
-	
+
+	void moveForward(int speed) {
+		//NOTE: speed may be unused if PWM cannot be figured out in time
+
+
+	}
+
+	int getStatus() {
+		return status; //check on status easily for debugging codes
+	}
+
+
 };
 
 
-uint8_t motorInit(uint8_t pin, uint8_t pinN, char oPort); //return status for tracking purposes
 
 
 
+/*
+* Status class variable causes on board LED to flash different patterns based on error codes (See status comments at top of program for more information)
+* This will help with code to board debugging
+* Codes:
+* 0 = LED off
+* 1 = 1 second period with 1 quick flash
+* 2 = 1 second period with 2 quick flashes
+* 3 = 1 second period with 3 quick flashes
+* -1 = LED constantly on
+*/
 
 int main(void)
 {
-	motorSystem(4,5,'b');
-	
-	while(1)
+
+
+
+	while (1)
 	{
-		//TODO:: Please write your application code
+
 	}
-}
-
-
-
-void motorControl(char direction, int speed){
-	
 }
