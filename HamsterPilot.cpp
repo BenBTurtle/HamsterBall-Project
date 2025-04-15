@@ -20,7 +20,7 @@ class motorSystem {
 	* This intuition will be used for directional control
 	*
 	* Status codes:
-	* 0 = fine
+	* 0 = All is dandy
 	* 1 = error with motor 0 initialization
 	* 2 = error with motor 1 initialization
 	* 3 = error with motor 2 initialization
@@ -55,7 +55,53 @@ public:
 
 	void moveForward(int speed) {
 		//NOTE: speed may be unused if PWM cannot be figured out in time
+		if (status != 0) {
+			return; //end early is there are errors from previous executions
+		}
 
+		switch (motorPorts[0]) { //motor 0 (front left)
+		case 'B': PORTB |= (1 << Ppins[0]); PORTB &= ~(1 << Npins[0]); break; //Enable positive, disable negative (wheel forward)
+		case 'C': PORTC |= (1 << Ppins[0]); PORTC &= ~(1 << Npins[0]); break;
+		case 'D': PORTD |= (1 << Ppins[0]); PORTD &= ~(1 << Npins[0]); break;
+		}
+
+		switch (motorPorts[1]) { //motor 1 (front right)
+		case 'B': PORTB |= (1 << Ppins[1]); PORTB &= ~(1 << Npins[1]); break; //Enable positive, disable negative (wheel forward)
+		case 'C': PORTC |= (1 << Ppins[1]); PORTC &= ~(1 << Npins[1]); break;
+		case 'D': PORTD |= (1 << Ppins[1]); PORTD &= ~(1 << Npins[1]); break;
+		}
+
+		switch (motorPorts[2]) { //motor 2 (back)
+		case 'B': PORTB &= ~(1 << Ppins[2]); PORTB &= ~(1 << Npins[2]); break; //Disable both positive and negative pins
+		case 'C': PORTC &= ~(1 << Ppins[2]); PORTC &= ~(1 << Npins[2]); break; //This wheel is not supposed to move at all
+		case 'D': PORTD &= ~(1 << Ppins[2]); PORTD &= ~(1 << Npins[2]); break;
+		}
+
+	}
+
+	void moveBackward(int speed) { //note, this just reverses the wheels from the move forward function
+		//NOTE: speed may be unused if PWM cannot be figured out in time
+		if (status != 0) {
+			return; //end early is there are errors from previous executions
+		}
+
+		switch (motorPorts[0]) { //motor 0 (front left)
+		case 'B': PORTB &= ~(1 << Ppins[0]); PORTB |= (1 << Npins[0]); break; //Enable negative, disable positive (wheel backward)
+		case 'C': PORTC &= ~(1 << Ppins[0]); PORTC |= (1 << Npins[0]); break;
+		case 'D': PORTD &= ~(1 << Ppins[0]); PORTD |= (1 << Npins[0]); break;
+		}
+
+		switch (motorPorts[1]) { //motor 1 (front right)
+		case 'B': PORTB &= ~(1 << Ppins[1]); PORTB |= (1 << Npins[1]); break; //Enable negative, disable positive (wheel backward)
+		case 'C': PORTC &= ~(1 << Ppins[1]); PORTC |= (1 << Npins[1]); break;
+		case 'D': PORTD &= ~(1 << Ppins[1]); PORTD |= (1 << Npins[1]); break;
+		}
+
+		switch (motorPorts[2]) { //motor 2 (back)
+		case 'B': PORTB &= ~(1 << Ppins[2]); PORTB &= ~(1 << Npins[2]); break; //Disable both positive and negative pins
+		case 'C': PORTC &= ~(1 << Ppins[2]); PORTC &= ~(1 << Npins[2]); break; //This wheel is not supposed to move at all
+		case 'D': PORTD &= ~(1 << Ppins[2]); PORTD &= ~(1 << Npins[2]); break;
+		}
 
 	}
 
