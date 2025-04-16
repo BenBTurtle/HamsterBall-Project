@@ -10,6 +10,8 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <util/delay.h> 
+
 
 class motorSystem {
 	/*
@@ -109,8 +111,22 @@ public:
 		return status; //check on status easily for debugging codes
 	}
 
-
 };
+
+void uartInit(int baudRate) { // initializes uart for processing with provided baud rate
+	UCSR0B |= (1 << TXEN0) | (1 << RXEN0); // | (1<<RXCIE0)  //uncomment this part for UART recieve inturrupt enable
+	UCSR0C |= (1 << UCSZ01) | (1 << UCSZ00); //set char size to 8 bits (2 hex characters)
+
+	int UBRR = (16000000 / (16 * baudRate)) - 1; //calculate UBRR (9600 should yield 103)
+
+	//UBRR0H = (UBRR<<8);
+	UBRR0L = UBRR;
+
+}
+int getUartIn() { //gets UART input 
+	return UDR0; //UDR0 should contain the data
+}
+
 
 
 
@@ -127,9 +143,23 @@ public:
 * -1 = LED constantly on
 */
 
-int main(void)
-{
+int main(void) {
+	//array initializations for pins and ports to be used with motors
+	int positivePins[3] = { 1,7,0 }; int negativePins[3] = { 0,6,1 }; char ports[3] = { 'B', 'D', 'C' };
+	motorSystem movement(positivePins, negativePins, ports);
 
+	int status = movement.getStatus();
+
+		DDRB |= (1 << 5); //set up on board led for debugging
+
+	if (status != 0) { //status has error located somewhere
+		switch (status) {
+		case 1: while (1) { PORTB ^= (1 << 5); _delay_ms(100); PORTB ^= (1 << 5); _delay_ms(900); } //infinite loop for flashing on board LED as debug code
+		case 2: while (1) { PORTB ^= (1 << 5); _delay_ms(100); PORTB ^= (1 << 5); _delay_ms(100); PORTB ^= (1 << 5); _delay_ms(100); PORTB ^= (1 << 5); _delay_ms(700); } //infinite loop for flashing on board LED as debug code
+		case 3: while (1) { PORTB ^= (1 << 5); _delay_ms(100); PORTB ^= (1 << 5); _delay_ms(100); PORTB ^= (1 << 5); _delay_ms(100); PORTB ^= (1 << 5); _delay_ms(100); PORTB ^= (1 << 5); _delay_ms(100); PORTB ^= (1 << 5); _delay_ms(500); } //infinite loop for flashing on board LED as debug code
+		case -1: while (1) { PORTB ^= (1 << 5); }
+		}
+	}
 
 
 	while (1)
